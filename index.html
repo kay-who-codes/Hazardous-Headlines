@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Hazardous Headlines</title>
+<title>Hazardous Headlines — My Hand</title>
 <style>
 :root{
   --bg:#121214; --panel:#1c1c20; --panel2:#232328; --text:#eee; --muted:#9a9aa2;
@@ -59,7 +59,7 @@ label{font-size:0.8rem; color:var(--muted); display:block; margin:0 0 6px;}
 </head>
 <body>
 <div class="wrap">
-  <h1>Hazardous Headlines</h1>
+  <h1>🐶 HAZARDOUS HEADLINES</h1>
   <div class="sub">Your private hand — everyone else has their own device</div>
 
   <div class="card-panel">
@@ -153,11 +153,19 @@ const WORD_BANK = [
 ];
 const EXCLUSIVE_LABEL = "⭐ EXCLUSIVE (doubles your hand)";
 
+function maybeStripArticle(txt){
+  // 50% chance to drop a leading "A " or "The " so the word starts with the next word instead
+  if(/^(A |The )/.test(txt) && Math.random() < 0.5){
+    return txt.replace(/^(A |The )/, '');
+  }
+  return txt;
+}
+
 function freshDeck(){
   let deck = [];
   WORD_BANK.forEach(([txt,pts])=>{
-    deck.push({text:txt, points:pts, exclusive:false});
-    deck.push({text:txt, points:pts, exclusive:false});
+    deck.push({text:maybeStripArticle(txt), points:pts, exclusive:false});
+    deck.push({text:maybeStripArticle(txt), points:pts, exclusive:false});
   });
   for(let i=0;i<3;i++) deck.push({text:EXCLUSIVE_LABEL, points:0, exclusive:true});
   return shuffle(deck);
