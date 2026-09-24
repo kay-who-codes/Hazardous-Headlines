@@ -39,6 +39,7 @@ label{font-size:0.8rem; color:var(--muted); display:block; margin:0 0 6px;}
 .hcard .txt{font-size:1rem;}
 .hcard .pts{color:var(--accent2); font-weight:700; font-size:0.9rem; margin-left:10px; white-space:nowrap;}
 .counter{text-align:center; color:var(--muted); font-size:0.8rem; margin-top:4px;}
+.deck-count{text-align:center; color:#55555c; font-size:0.7rem; margin:-10px 0 14px; letter-spacing:0.3px;}
 .note{background:#1a1a1e; border-left:3px solid var(--accent2); padding:10px 12px; border-radius:6px; font-size:0.82rem; color:var(--muted); margin-top:10px;}
 .flexrow{display:flex; gap:8px;}
 .flexrow .btn{flex:1;}
@@ -61,6 +62,7 @@ label{font-size:0.8rem; color:var(--muted); display:block; margin:0 0 6px;}
 <div class="wrap">
   <h1>🐶 HAZARDOUS HEADLINES</h1>
   <div class="sub">Your private hand — everyone else has their own device</div>
+  <div class="deck-count" id="deckCount"></div>
 
   <div class="card-panel">
     <label style="margin-bottom:2px;">Select up to 3 cards</label>
@@ -251,6 +253,13 @@ function closeFullscreen(){
 }
 
 init();
+renderDeckCount();
+
+function renderDeckCount(){
+  const uniqueWords = WORD_BANK.length;
+  const totalCards = (uniqueWords * 2) + 3; // 2 copies of each word + 3 exclusive cards
+  document.getElementById('deckCount').textContent = `${totalCards} cards in play · ${uniqueWords} unique headline pieces`;
+}
 </script>
 </body>
 </html>
