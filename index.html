@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Man Bites Dog</title>
+<style>
+:root{
+  --bg:#121214; --panel:#1c1c20; --panel2:#232328; --text:#eee; --muted:#9a9aa2;
+  --accent:#ff5a5f; --accent2:#ffb84d; --good:#4caf7d; --bad:#e05a5a;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html{height:100%; scroll-padding-top:env(safe-area-inset-top,0px);}
+body{
+  height:100%; margin:0; background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  display:flex; flex-direction:column; align-items:center;
+}
+.wrap{width:100%; max-width:480px; padding:16px; padding-bottom:40px;}
+h1{font-size:1.5rem; letter-spacing:0.5px; margin:4px 0 2px; text-align:center;}
+.sub{text-align:center; color:var(--muted); font-size:0.85rem; margin-bottom:18px;}
+.card-panel{background:var(--panel); border-radius:14px; padding:16px; margin-bottom:14px; border:1px solid #2a2a30;}
+.btn{
+  background:var(--accent); color:#fff; border:none; border-radius:10px; padding:12px 16px;
+  font-size:1rem; font-weight:600; width:100%; margin-top:8px; cursor:pointer;
+}
+.btn.secondary{background:var(--panel2); color:var(--text); border:1px solid #333;}
+.btn.small{width:auto; padding:8px 14px; font-size:0.85rem;}
+.btn:disabled{opacity:0.4;}
+input[type=text], input[type=number]{
+  width:100%; padding:10px; border-radius:8px; border:1px solid #333; background:#0f0f12; color:var(--text); font-size:1rem;
+}
+label{font-size:0.85rem; color:var(--muted); display:block; margin:10px 0 4px;}
+.player-row{display:flex; gap:8px; align-items:center; margin-bottom:8px;}
+.player-row input{flex:1;}
+.remove{background:var(--bad); border:none; color:#fff; border-radius:8px; width:36px; height:36px; font-size:1rem;}
+.hand{display:flex; flex-direction:column; gap:8px; margin:10px 0;}
+.hcard{
+  background:var(--panel2); border:2px solid #333; border-radius:10px; padding:10px 12px;
+  display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select:none;
+}
+.hcard.selected{border-color:var(--accent); background:#2a1c1e;}
+.hcard.exclusive{border-color:var(--accent2); }
+.hcard .txt{font-size:0.95rem;}
+.hcard .pts{color:var(--accent2); font-weight:700; font-size:0.9rem; margin-left:10px; white-space:nowrap;}
+.discard-hint{color:var(--muted); font-size:0.8rem; margin-top:4px;}
+.headline-preview{background:#0f0f12; border:1px dashed #444; border-radius:10px; padding:12px; font-size:1.05rem; font-style:italic; min-height:50px; margin:10px 0;}
+.scoreboard{display:flex; flex-direction:column; gap:6px; margin:10px 0;}
+.srow{display:flex; justify-content:space-between; background:var(--panel2); padding:8px 12px; border-radius:8px; font-size:0.95rem;}
+.srow.leader{border:1px solid var(--accent2);}
+.pill{display:inline-block; background:var(--panel2); border-radius:20px; padding:4px 10px; font-size:0.75rem; color:var(--muted); margin-bottom:8px;}
+.center{text-align:center;}
+.section-title{font-weight:700; margin-bottom:6px;}
+.flexrow{display:flex; gap:8px;}
+.flexrow .btn{flex:1;}
+.hidden{display:none;}
+.dealer-note{background:#1a1a1e; border-left:3px solid var(--accent2); padding:10px 12px; border-radius:6px; font-size:0.85rem; color:var(--muted); margin-bottom:12px;}
+.winner{text-align:center; font-size:1.3rem; color:var(--accent2); margin:20px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🐶 MAN BITES DOG</h1>
+  <div class="sub">Pass-and-play headline party game</div>
+
+  <!-- SETUP -->
+  <div id="setup" class="card-panel">
+    <div class="section-title">Players</div>
+    <div id="playerList"></div>
+    <button class="btn secondary" onclick="addPlayer()">+ Add Player</button>
+    <button class="btn" onclick="startGame()">Start Game</button>
+    <div class="dealer-note">This is a single pass-and-play app — since separate phones can't sync without wifi/internet, everyone takes turns passing this one device around.</div>
+  </div>
+
+  <!-- GAME -->
+  <div id="game" class="hidden">
+    <div class="pill" id="roundPill"></div>
+    <div class="scoreboard" id="scoreboard"></div>
+
+    <div class="card-panel" id="dealerPanel">
+      <div class="section-title">Dealer: <span id="dealerName"></span></div>
+      <p style="color:var(--muted); font-size:0.85rem;">Hand device to <b id="dealerName2"></b>. Tap "Deal Hand" when ready.</p>
+      <button class="btn" onclick="dealHand()">Deal Hand (5 cards)</button>
+    </div>
+
+    <div class="card-panel hidden" id="handPanel">
+      <div class="section-title" id="turnPlayerLabel"></div>
+      <div class="discard-hint">Tap up to 3 cards to discard, then confirm — or skip straight to building your headline.</div>
+      <div class="hand" id="handDiv"></div>
+      <div class="flexrow">
+        <button class="btn secondary" onclick="confirmDiscard()">Discard Selected</button>
+        <button class="btn" onclick="goToHeadline()">Keep Hand / Continue</button>
+      </div>
+    </div>
+
+    <div class="card-panel hidden" id="headlinePanel">
+      <div class="section-title" id="headlineTurnLabel"></div>
+      <p style="color:var(--muted); font-size:0.85rem;">Tap cards (in order) to build your headline.</p>
+      <div class="hand" id="headlineHandDiv"></div>
+      <div class="headline-preview" id="headlinePreview">Your headline will appear here...</div>
+      <label>Points from selected cards</label>
+      <div id="pointsPreview" style="font-weight:700; color:var(--accent2); font-size:1.1rem;">0</div>
+      <label style="display:flex; align-items:center; gap:8px; margin-top:12px;">
+        <input type="checkbox" id="exclusiveToggle" style="width:auto;"> Use an Exclusive Card (doubles score this hand)
+      </label>
+      <button class="btn" onclick="submitHeadline()">Submit Headline</button>
+    </div>
+
+    <div class="card-panel hidden" id="votePanel">
+      <div class="section-title">Vote: Does this headline make sense?</div>
+      <div class="headline-preview" id="voteHeadlineText"></div>
+      <p style="color:var(--muted); font-size:0.85rem;">If a majority say no, the score is zero and this player writes a new headline next turn instead.</p>
+      <div class="flexrow">
+        <button class="btn" style="background:var(--good)" onclick="resolveVote(true)">✅ Majority: Makes Sense</button>
+        <button class="btn" style="background:var(--bad)" onclick="resolveVote(false)">❌ Majority: No Sense</button>
+      </div>
+    </div>
+
+    <div class="card-panel hidden" id="zeroPanel">
+      <div class="section-title">No headline could be made / rejected</div>
+      <p style="color:var(--muted); font-size:0.85rem;">This player scores 0 for the hand.</p>
+      <button class="btn" onclick="finishTurnZero()">Continue</button>
+    </div>
+
+    <div class="card-panel hidden" id="nextHandPanel">
+      <div class="section-title">Hand Complete</div>
+      <div id="handSummary"></div>
+      <button class="btn" onclick="startNextHand()">Next Hand — New Dealer</button>
+    </div>
+
+    <div class="hidden" id="winnerPanel">
+      <div class="winner" id="winnerText"></div>
+      <button class="btn" onclick="location.reload()">New Game</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- Card bank (word/phrase fragments to assemble into a headline) ----------
+const WORD_BANK = [
+  ["Local Man",8],["Blind Dog",10],["Mayor",6],["The President",12],["A Toddler",9],
+  ["Your Ex",11],["Scientists",7],["A Raccoon",14],["Grandma",9],["The Pope",15],
+  ["A Robot",13],["The IRS",10],["A Squirrel",12],["The Weather Channel",8],
+  ["Weeps for",7],["Bites",9],["Steals",8],["Elopes with",13],["Sues",10],
+  ["Confesses to",11],["Adopts",6],["Arrested for",12],["Runs for",9],
+  ["Falls in Love with",14],["Declares War on",15],["Accidentally Becomes",13],
+  ["A Casserole",8],["The Moon",10],["A Parking Meter",12],["Bigfoot",13],
+  ["A Vending Machine",11],["The Internet",9],["A Flock of Geese",14],
+  ["Their Own Shadow",10],["A Time Machine",12],["The Eiffel Tower",11],
+  ["Mayor's Office",7],["Local Diner",6],["Downtown",5],["City Hall",6],
+  ["at Midnight",5],["During Rush Hour",7],["on Live TV",9],["at the DMV",8],
+  ["in Florida",7],["at a Wedding",8],["Again",4],["for the Third Time",9],
+  ["and Nobody Is Surprised",10],["and Wins",8],["Twitter Explodes",9]
+];
+const EXCLUSIVE_LABEL = "⭐ EXCLUSIVE";
+
+function buildDeck(){
+  let deck = [];
+  WORD_BANK.forEach(([txt,pts])=>{
+    // roughly 2 copies of each to fill out a ~100 card deck feel
+    deck.push({text:txt, points:pts, exclusive:false});
+    deck.push({text:txt, points:pts, exclusive:false});
+  });
+  for(let i=0;i<3;i++) deck.push({text:EXCLUSIVE_LABEL, points:0, exclusive:true});
+  return shuffle(deck);
+}
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+// ---------- State ----------
+let state = {
+  players: [], // {name, score}
+  deck: [],
+  discardPile: [],
+  hands: {}, // playerIndex -> array of cards
+  dealerIndex: 0,
+  turnIndex: 0, // whose headline we're building, cycles through non-dealer... actually all players build each hand
+  order: [], // player indices to take a turn this hand
+  turnPointer: 0,
+  selectedDiscard: [],
+  selectedHeadlineCards: [],
+  currentHeadlineText: [],
+  roundNum: 1
+};
+
+// ---------- Setup screen ----------
+function addPlayer(name){
+  const list = document.getElementById('playerList');
+  const row = document.createElement('div');
+  row.className = 'player-row';
+  row.innerHTML = `<input type="text" placeholder="Player name" value="${name||''}">
+    <button class="remove" onclick="this.parentElement.remove()">✕</button>`;
+  list.appendChild(row);
+}
+addPlayer(); addPlayer(); addPlayer();
+
+function startGame(){
+  const inputs = document.querySelectorAll('#playerList input');
+  const names = Array.from(inputs).map(i=>i.value.trim()).filter(Boolean);
+  if(names.length < 2){ alert("Add at least 2 players."); return; }
+  state.players = names.map(n=>({name:n, score:0}));
+  state.deck = buildDeck();
+  state.discardPile = [];
+  state.dealerIndex = Math.floor(Math.random()*state.players.length);
+  document.getElementById('setup').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  startNextHandInternal();
+}
+
+// ---------- Hand flow ----------
+function startNextHandInternal(){
+  // reshuffle discard into deck if needed
+  if(state.deck.length < state.players.length*5){
+    state.deck = shuffle(state.deck.concat(state.discardPile));
+    state.discardPile = [];
+  }
+  state.hands = {};
+  state.order = state.players.map((_,i)=>i).filter(i=>i!==state.dealerIndex);
+  // dealer also plays, goes last in order per "left of dealer discards first" -> dealer's headline turn order: left of dealer first, then around, dealer last
+  let n = state.players.length;
+  let ordered = [];
+  for(let k=1;k<n;k++){ ordered.push((state.dealerIndex+k)%n); }
+  ordered.push(state.dealerIndex);
+  state.order = ordered;
+  state.turnPointer = 0;
+  state.roundNum = (state.roundNum||1);
+  renderScoreboard();
+  document.getElementById('roundPill').textContent = `Hand — Dealer: ${state.players[state.dealerIndex].name}`;
+  showPanel('dealerPanel');
+  document.getElementById('dealerName').textContent = state.players[state.dealerIndex].name;
+  document.getElementById('dealerName2').textContent = state.players[state.dealerIndex].name;
+}
+
+function drawCard(){
+  if(state.deck.length===0){
+    state.deck = shuffle(state.discardPile);
+    state.discardPile = [];
+  }
+  return state.deck.pop();
+}
+
+function dealHand(){
+  state.players.forEach((p,i)=>{
+    state.hands[i] = [];
+    for(let c=0;c<5;c++) state.hands[i].push(drawCard());
+  });
+  showPanel(null);
+  startPlayerTurn();
+}
+
+function startPlayerTurn(){
+  if(state.turnPointer >= state.order.length){
+    // hand done
+    showHandSummary();
+    return;
+  }
+  const pIndex = state.order[state.turnPointer];
+  state.currentPlayer = pIndex;
+  state.selectedDiscard = [];
+  renderDiscardHand();
+  document.getElementById('turnPlayerLabel').textContent = `${state.players[pIndex].name}'s turn — pass the device`;
+  showPanel('handPanel');
+}
+
+function renderDiscardHand(){
+  const div = document.getElementById('handDiv');
+  div.innerHTML = '';
+  const hand = state.hands[state.currentPlayer];
+  hand.forEach((card, idx)=>{
+    const el = document.createElement('div');
+    el.className = 'hcard' + (card.exclusive?' exclusive':'') + (state.selectedDiscard.includes(idx)?' selected':'');
+    el.innerHTML = `<span class="txt">${card.text}</span><span class="pts">${card.exclusive? '★' : card.points+' pts'}</span>`;
+    el.onclick = ()=>{
+      const pos = state.selectedDiscard.indexOf(idx);
+      if(pos>-1){ state.selectedDiscard.splice(pos,1); }
+      else if(state.selectedDiscard.length<3){ state.selectedDiscard.push(idx); }
+      renderDiscardHand();
+    };
+    div.appendChild(el);
+  });
+}
+
+function confirmDiscard(){
+  const hand = state.hands[state.currentPlayer];
+  const toDiscard = state.selectedDiscard.slice().sort((a,b)=>b-a);
+  toDiscard.forEach(idx=>{
+    state.discardPile.push(hand[idx]);
+    hand.splice(idx,1);
+  });
+  const need = 5-hand.length;
+  for(let i=0;i<need;i++) hand.push(drawCard());
+  state.selectedDiscard = [];
+  goToHeadline();
+}
+
+function goToHeadline(){
+  state.selectedHeadlineCards = [];
+  renderHeadlineHand();
+  document.getElementById('headlineTurnLabel').textContent = `${state.players[state.currentPlayer].name}: build your headline`;
+  document.getElementById('exclusiveToggle').checked = false;
+  showPanel('headlinePanel');
+}
+
+function renderHeadlineHand(){
+  const div = document.getElementById('headlineHandDiv');
+  div.innerHTML = '';
+  const hand = state.hands[state.currentPlayer];
+  hand.forEach((card, idx)=>{
+    const selPos = state.selectedHeadlineCards.indexOf(idx);
+    const el = document.createElement('div');
+    el.className = 'hcard' + (card.exclusive?' exclusive':'') + (selPos>-1?' selected':'');
+    el.innerHTML = `<span class="txt">${card.text}${selPos>-1?' <b>#'+(selPos+1)+'</b>':''}</span><span class="pts">${card.exclusive? '★' : card.points+' pts'}</span>`;
+    el.onclick = ()=>{
+      if(card.exclusive){ document.getElementById('exclusiveToggle').checked = true; return; }
+      const pos = state.selectedHeadlineCards.indexOf(idx);
+      if(pos>-1){ state.selectedHeadlineCards.splice(pos,1); }
+      else{ state.selectedHeadlineCards.push(idx); }
+      renderHeadlineHand();
+      updateHeadlinePreview();
+    };
+    div.appendChild(el);
+  });
+  updateHeadlinePreview();
+}
+
+function updateHeadlinePreview(){
+  const hand = state.hands[state.currentPlayer];
+  const words = state.selectedHeadlineCards.map(idx=>hand[idx].text);
+  document.getElementById('headlinePreview').textContent = words.length? words.join(' ') : "Your headline will appear here...";
+  let pts = state.selectedHeadlineCards.reduce((sum,idx)=>sum+hand[idx].points,0);
+  if(document.getElementById('exclusiveToggle').checked) pts *= 2;
+  document.getElementById('pointsPreview').textContent = pts;
+}
+document.addEventListener('change', (e)=>{
+  if(e.target && e.target.id==='exclusiveToggle') updateHeadlinePreview();
+});
+
+function submitHeadline(){
+  const hand = state.hands[state.currentPlayer];
+  if(state.selectedHeadlineCards.length===0){
+    // can't make a headline
+    state.pendingZero = true;
+    showPanel('zeroPanel');
+    return;
+  }
+  const words = state.selectedHeadlineCards.map(idx=>hand[idx].text);
+  let pts = state.selectedHeadlineCards.reduce((sum,idx)=>sum+hand[idx].points,0);
+  const exclusive = document.getElementById('exclusiveToggle').checked;
+  if(exclusive) pts *= 2;
+  state.pendingHeadline = words.join(' ');
+  state.pendingPoints = pts;
+  document.getElementById('voteHeadlineText').textContent = state.pendingHeadline;
+  showPanel('votePanel');
+}
+
+function resolveVote(makesSense){
+  if(makesSense){
+    state.players[state.currentPlayer].score += state.pendingPoints;
+    finishTurnAdvance();
+  } else {
+    showPanel('zeroPanel');
+  }
+}
+
+function finishTurnZero(){
+  state.players[state.currentPlayer].score += 0;
+  finishTurnAdvance();
+}
+
+function finishTurnAdvance(){
+  renderScoreboard();
+  state.turnPointer++;
+  startPlayerTurn();
+}
+
+function showHandSummary(){
+  const div = document.getElementById('handSummary');
+  div.innerHTML = state.players.map(p=>`<div class="srow"><span>${p.name}</span><span>${p.score} pts</span></div>`).join('');
+  showPanel('nextHandPanel');
+  // check winner
+  const maxScore = Math.max(...state.players.map(p=>p.score));
+  if(maxScore >= 500){
+    const winners = state.players.filter(p=>p.score===maxScore);
+    document.getElementById('winnerText').textContent = winners.length>1
+      ? `Tie! Highest score wins: ${winners.map(w=>w.name).join(' & ')} with ${maxScore} pts!`
+      : `🏆 ${winners[0].name} wins with ${maxScore} points!`;
+    document.getElementById('winnerPanel').classList.remove('hidden');
+    document.getElementById('nextHandPanel').classList.add('hidden');
+  }
+}
+
+function startNextHand(){
+  state.dealerIndex = (state.dealerIndex+1) % state.players.length;
+  startNextHandInternal();
+}
+
+// ---------- helpers ----------
+function showPanel(id){
+  ['dealerPanel','handPanel','headlinePanel','votePanel','zeroPanel','nextHandPanel'].forEach(pid=>{
+    document.getElementById(pid).classList.toggle('hidden', pid!==id);
+  });
+}
+
+function renderScoreboard(){
+  const div = document.getElementById('scoreboard');
+  const maxScore = Math.max(...state.players.map(p=>p.score),0);
+  div.innerHTML = state.players.map(p=>
+    `<div class="srow ${p.score===maxScore && maxScore>0 ? 'leader':''}"><span>${p.name}</span><span>${p.score} pts</span></div>`
+  ).join('');
+}
+</script>
+</body>
+</html>
