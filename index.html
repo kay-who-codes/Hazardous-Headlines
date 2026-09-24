@@ -3,162 +3,159 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Man Bites Dog</title>
+<title>Hazardous Headlines</title>
 <style>
 :root{
   --bg:#121214; --panel:#1c1c20; --panel2:#232328; --text:#eee; --muted:#9a9aa2;
-  --accent:#ff5a5f; --accent2:#ffb84d; --good:#4caf7d; --bad:#e05a5a;
+  --accent:#ff5a5f; --accent2:#ffb84d;
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;}
-html{height:100%; scroll-padding-top:env(safe-area-inset-top,0px);}
+html,body{height:100%;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
 body{
-  height:100%; margin:0; background:var(--bg); color:var(--text);
+  margin:0; background:var(--bg); color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   display:flex; flex-direction:column; align-items:center;
 }
 .wrap{width:100%; max-width:480px; padding:16px; padding-bottom:40px;}
-h1{font-size:1.5rem; letter-spacing:0.5px; margin:4px 0 2px; text-align:center;}
-.sub{text-align:center; color:var(--muted); font-size:0.85rem; margin-bottom:18px;}
+h1{font-size:1.4rem; text-align:center; margin:4px 0 0;}
+.sub{text-align:center; color:var(--muted); font-size:0.82rem; margin-bottom:16px;}
 .card-panel{background:var(--panel); border-radius:14px; padding:16px; margin-bottom:14px; border:1px solid #2a2a30;}
 .btn{
-  background:var(--accent); color:#fff; border:none; border-radius:10px; padding:12px 16px;
+  background:var(--accent); color:#fff; border:none; border-radius:10px; padding:13px 16px;
   font-size:1rem; font-weight:600; width:100%; margin-top:8px; cursor:pointer;
 }
 .btn.secondary{background:var(--panel2); color:var(--text); border:1px solid #333;}
-.btn.small{width:auto; padding:8px 14px; font-size:0.85rem;}
-.btn:disabled{opacity:0.4;}
-input[type=text], input[type=number]{
-  width:100%; padding:10px; border-radius:8px; border:1px solid #333; background:#0f0f12; color:var(--text); font-size:1rem;
-}
-label{font-size:0.85rem; color:var(--muted); display:block; margin:10px 0 4px;}
-.player-row{display:flex; gap:8px; align-items:center; margin-bottom:8px;}
-.player-row input{flex:1;}
-.remove{background:var(--bad); border:none; color:#fff; border-radius:8px; width:36px; height:36px; font-size:1rem;}
+.btn:disabled{opacity:0.35;}
+label{font-size:0.8rem; color:var(--muted); display:block; margin:0 0 6px;}
 .hand{display:flex; flex-direction:column; gap:8px; margin:10px 0;}
 .hcard{
-  background:var(--panel2); border:2px solid #333; border-radius:10px; padding:10px 12px;
-  display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select:none;
+  background:var(--panel2); border:2px solid #333; border-radius:10px; padding:12px 14px;
+  display:flex; justify-content:space-between; align-items:center; user-select:none; cursor:pointer;
 }
+.hcard.exclusive{border-color:var(--accent2); background:#2a230f;}
 .hcard.selected{border-color:var(--accent); background:#2a1c1e;}
-.hcard.exclusive{border-color:var(--accent2); }
-.hcard .txt{font-size:0.95rem;}
+.hcard .txt{font-size:1rem;}
 .hcard .pts{color:var(--accent2); font-weight:700; font-size:0.9rem; margin-left:10px; white-space:nowrap;}
-.discard-hint{color:var(--muted); font-size:0.8rem; margin-top:4px;}
-.headline-preview{background:#0f0f12; border:1px dashed #444; border-radius:10px; padding:12px; font-size:1.05rem; font-style:italic; min-height:50px; margin:10px 0;}
-.scoreboard{display:flex; flex-direction:column; gap:6px; margin:10px 0;}
-.srow{display:flex; justify-content:space-between; background:var(--panel2); padding:8px 12px; border-radius:8px; font-size:0.95rem;}
-.srow.leader{border:1px solid var(--accent2);}
-.pill{display:inline-block; background:var(--panel2); border-radius:20px; padding:4px 10px; font-size:0.75rem; color:var(--muted); margin-bottom:8px;}
-.center{text-align:center;}
-.section-title{font-weight:700; margin-bottom:6px;}
+.counter{text-align:center; color:var(--muted); font-size:0.8rem; margin-top:4px;}
+.note{background:#1a1a1e; border-left:3px solid var(--accent2); padding:10px 12px; border-radius:6px; font-size:0.82rem; color:var(--muted); margin-top:10px;}
 .flexrow{display:flex; gap:8px;}
 .flexrow .btn{flex:1;}
-.hidden{display:none;}
-.dealer-note{background:#1a1a1e; border-left:3px solid var(--accent2); padding:10px 12px; border-radius:6px; font-size:0.85rem; color:var(--muted); margin-bottom:12px;}
-.winner{text-align:center; font-size:1.3rem; color:var(--accent2); margin:20px 0;}
+/* fullscreen headline overlay */
+.overlay{
+  position:fixed; inset:0; background:var(--bg); z-index:50;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:24px; text-align:center; gap:14px;
+}
+.overlay.hidden{display:none;}
+.overlay .word{font-size:2rem; font-weight:800; line-height:1.3;}
+.overlay .close{
+  position:absolute; top:calc(16px + env(safe-area-inset-top,0px)); right:16px;
+  background:var(--panel2); border:1px solid #333; color:var(--text);
+  width:44px; height:44px; border-radius:50%; font-size:1.2rem; cursor:pointer;
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>🐶 MAN BITES DOG</h1>
-  <div class="sub">Pass-and-play headline party game</div>
+  <h1>Hazardous Headlines</h1>
+  <div class="sub">Your private hand — everyone else has their own device</div>
 
-  <!-- SETUP -->
-  <div id="setup" class="card-panel">
-    <div class="section-title">Players</div>
-    <div id="playerList"></div>
-    <button class="btn secondary" onclick="addPlayer()">+ Add Player</button>
-    <button class="btn" onclick="startGame()">Start Game</button>
-    <div class="dealer-note">This is a single pass-and-play app — since separate phones can't sync without wifi/internet, everyone takes turns passing this one device around.</div>
-  </div>
-
-  <!-- GAME -->
-  <div id="game" class="hidden">
-    <div class="pill" id="roundPill"></div>
-    <div class="scoreboard" id="scoreboard"></div>
-
-    <div class="card-panel" id="dealerPanel">
-      <div class="section-title">Dealer: <span id="dealerName"></span></div>
-      <p style="color:var(--muted); font-size:0.85rem;">Hand device to <b id="dealerName2"></b>. Tap "Deal Hand" when ready.</p>
-      <button class="btn" onclick="dealHand()">Deal Hand (5 cards)</button>
+  <div class="card-panel">
+    <label style="margin-bottom:2px;">Select up to 3 cards</label>
+    <div class="hand" id="handDiv"></div>
+    <div class="counter" id="selCounter"></div>
+    <div class="flexrow">
+      <button class="btn" id="showBtn" onclick="showFullscreen()">Display Headline</button>
+      <button class="btn secondary" id="swapBtn" onclick="swapSelected()">Swap Selected</button>
     </div>
-
-    <div class="card-panel hidden" id="handPanel">
-      <div class="section-title" id="turnPlayerLabel"></div>
-      <div class="discard-hint">Tap up to 3 cards to discard, then confirm — or skip straight to building your headline.</div>
-      <div class="hand" id="handDiv"></div>
-      <div class="flexrow">
-        <button class="btn secondary" onclick="confirmDiscard()">Discard Selected</button>
-        <button class="btn" onclick="goToHeadline()">Keep Hand / Continue</button>
-      </div>
-    </div>
-
-    <div class="card-panel hidden" id="headlinePanel">
-      <div class="section-title" id="headlineTurnLabel"></div>
-      <p style="color:var(--muted); font-size:0.85rem;">Tap cards (in order) to build your headline.</p>
-      <div class="hand" id="headlineHandDiv"></div>
-      <div class="headline-preview" id="headlinePreview">Your headline will appear here...</div>
-      <label>Points from selected cards</label>
-      <div id="pointsPreview" style="font-weight:700; color:var(--accent2); font-size:1.1rem;">0</div>
-      <label style="display:flex; align-items:center; gap:8px; margin-top:12px;">
-        <input type="checkbox" id="exclusiveToggle" style="width:auto;"> Use an Exclusive Card (doubles score this hand)
-      </label>
-      <button class="btn" onclick="submitHeadline()">Submit Headline</button>
-    </div>
-
-    <div class="card-panel hidden" id="votePanel">
-      <div class="section-title">Vote: Does this headline make sense?</div>
-      <div class="headline-preview" id="voteHeadlineText"></div>
-      <p style="color:var(--muted); font-size:0.85rem;">If a majority say no, the score is zero and this player writes a new headline next turn instead.</p>
-      <div class="flexrow">
-        <button class="btn" style="background:var(--good)" onclick="resolveVote(true)">✅ Majority: Makes Sense</button>
-        <button class="btn" style="background:var(--bad)" onclick="resolveVote(false)">❌ Majority: No Sense</button>
-      </div>
-    </div>
-
-    <div class="card-panel hidden" id="zeroPanel">
-      <div class="section-title">No headline could be made / rejected</div>
-      <p style="color:var(--muted); font-size:0.85rem;">This player scores 0 for the hand.</p>
-      <button class="btn" onclick="finishTurnZero()">Continue</button>
-    </div>
-
-    <div class="card-panel hidden" id="nextHandPanel">
-      <div class="section-title">Hand Complete</div>
-      <div id="handSummary"></div>
-      <button class="btn" onclick="startNextHand()">Next Hand — New Dealer</button>
-    </div>
-
-    <div class="hidden" id="winnerPanel">
-      <div class="winner" id="winnerText"></div>
-      <button class="btn" onclick="location.reload()">New Game</button>
-    </div>
+    <button class="btn secondary" onclick="newHand()">New Hand (5 fresh cards)</button>
+    <div class="note" id="swapNote">You can swap up to 3 cards once per hand. Select the cards to replace, then tap Swap.</div>
   </div>
 </div>
 
+<div class="overlay hidden" id="fullscreen">
+  <button class="close" onclick="closeFullscreen()">✕</button>
+  <div id="fullscreenText"></div>
+</div>
+
 <script>
-// ---------- Card bank (word/phrase fragments to assemble into a headline) ----------
 const WORD_BANK = [
+  // Subjects / Who
   ["Local Man",8],["Blind Dog",10],["Mayor",6],["The President",12],["A Toddler",9],
   ["Your Ex",11],["Scientists",7],["A Raccoon",14],["Grandma",9],["The Pope",15],
   ["A Robot",13],["The IRS",10],["A Squirrel",12],["The Weather Channel",8],
+  ["Local Woman",8],["The Vice President",11],["A Nun",10],["Your Landlord",11],
+  ["A Substitute Teacher",10],["The Neighborhood Cat",9],["A Traveling Salesman",11],
+  ["Your Uncle",8],["The Local Sheriff",9],["A Retired Astronaut",13],
+  ["The School Board",8],["A Group of Nudists",14],["The Boy Scouts",7],
+  ["A Psychic",9],["The Class President Class of '99",13],["Your Dentist",8],
+  ["A Cult Leader",13],["The National Guard",9],["A Furry Convention",12],
+  ["Local Teens",7],["The Homeowners Association",10],["A Disgraced Senator",12],
+  ["Your Roommate",8],["The Ice Cream Man",9],["A Flat Earther",11],
+  ["The Kardashians",10],["A Sleep-Deprived Barista",10],["Your Therapist",9],
+  ["The Local Librarian",7],["A Confused Tourist",9],["The Tooth Fairy",10],
+  ["A Rogue AI",14],["The Illuminati",13],["A Retired Wrestler",11],
+  ["The Mail Carrier",7],["A Suburban Dad",8],["The Prom Queen",8],
+  ["A Bigfoot Hunter",11],["The Local Militia",11],["A Time Traveler",13],
+  ["The Easter Bunny",10],["A Disbarred Lawyer",11],["The Coast Guard",9],
+  ["A Talking Parrot",12],["The Local Gym",6],["A Conspiracy Theorist",11],
+  ["The Zoo Director",8],["A Runaway Bride",12],["The PTA",7],
+  ["A Notorious Hacker",13],["The Local Priest",9],["A Karen",9],
+  ["The Entire Cheer Squad",10],["A Vegan Bodybuilder",10],
+  // Verbs / Actions
   ["Weeps for",7],["Bites",9],["Steals",8],["Elopes with",13],["Sues",10],
   ["Confesses to",11],["Adopts",6],["Arrested for",12],["Runs for",9],
   ["Falls in Love with",14],["Declares War on",15],["Accidentally Becomes",13],
+  ["Marries",10],["Kidnaps",13],["Impersonates",12],["Divorces",9],
+  ["Challenges",8],["Publicly Endorses",9],["Secretly Films",11],
+  ["Accidentally Adopts",11],["Files a Restraining Order Against",13],
+  ["Legally Changes Name to",14],["Live-Streams",9],["Auctions Off",10],
+  ["Trains",7],["Interrogates",11],["Haunts",9],["Vandalizes",10],
+  ["Blackmails",12],["Photobombs",8],["Serenades",9],["Deep-Fries",8],
+  ["Un-Retires to Fight",13],["Founds a Religion Around",14],["Forgives",6],
+  ["Frames",9],["Ghosts",7],["Rescues",7],["Chases",7],["Worships",9],
+  ["Body-Slams",12],["Recruits",8],["Fires",6],["Poisons",10],
+  ["Betrays",9],["Overthrows",12],["Resurrects",13],["Clones",11],
+  ["Sabotages",11],["Eats",5],["Insures",8],["Un-Invites",7],
+  // Objects / Targets
   ["A Casserole",8],["The Moon",10],["A Parking Meter",12],["Bigfoot",13],
   ["A Vending Machine",11],["The Internet",9],["A Flock of Geese",14],
   ["Their Own Shadow",10],["A Time Machine",12],["The Eiffel Tower",11],
+  ["A Garden Gnome",9],["The DMV Line",8],["A Haunted Mirror",12],
+  ["The School Mascot",8],["A Wheel of Cheese",10],["The Office Printer",7],
+  ["A Sentient Toaster",13],["The Loch Ness Monster",13],["A Drone",9],
+  ["The Class Hamster",8],["A Pile of Tax Documents",9],["The Self-Checkout",8],
+  ["A Herd of Alpacas",12],["The Great Barrier Reef",11],["A Karaoke Machine",9],
+  ["The Titanic Wreckage",12],["A Suspiciously Large Turkey",11],
+  ["The Interstate",9],["A Piñata",8],["The County Fair",7],
+  ["A Cursed Amulet",12],["The Grocery Store",6],["A Rubber Duck",7],
+  ["The Local Landfill",8],["A Stack of Pancakes",9],["The Ozone Layer",10],
+  ["A Malfunctioning ATM",10],["The Space Station",12],["A Bounce House",8],
+  // Places / Time / Tags
   ["Mayor's Office",7],["Local Diner",6],["Downtown",5],["City Hall",6],
   ["at Midnight",5],["During Rush Hour",7],["on Live TV",9],["at the DMV",8],
   ["in Florida",7],["at a Wedding",8],["Again",4],["for the Third Time",9],
-  ["and Nobody Is Surprised",10],["and Wins",8],["Twitter Explodes",9]
+  ["and Nobody Is Surprised",10],["and Wins",8],["Twitter Explodes",9],
+  ["at the Grocery Store",6],["During the Super Bowl",9],["in a Costco",7],
+  ["at Church",6],["on the Subway",7],["at the County Fair",7],
+  ["During a Solar Eclipse",10],["at the Laundromat",6],["in a Walmart Parking Lot",8],
+  ["at 3 A.M.",6],["During Finals Week",8],["at the DMV Again",9],
+  ["Live on the Radio",8],["at a Gas Station",7],["During a Thunderstorm",9],
+  ["at a Little League Game",8],["in the Cereal Aisle",7],["at Burning Man",10],
+  ["and Refuses to Apologize",10],["and It's Caught on Camera",11],
+  ["and the Internet Can't Stop Laughing",13],["Before Breakfast",7],
+  ["and Demands a Recount",9],["While Wearing a Onesie",10],
+  ["and Blames Mercury Retrograde",11],["for Charity",7],
+  ["and It Somehow Works",9],["and Local News Shows Up",10],
+  ["Out of Spite",8],["by Accident",6],["on a Dare",7],["for the Likes",8]
 ];
-const EXCLUSIVE_LABEL = "⭐ EXCLUSIVE";
+const EXCLUSIVE_LABEL = "⭐ EXCLUSIVE (doubles your hand)";
 
-function buildDeck(){
+function freshDeck(){
   let deck = [];
   WORD_BANK.forEach(([txt,pts])=>{
-    // roughly 2 copies of each to fill out a ~100 card deck feel
     deck.push({text:txt, points:pts, exclusive:false});
     deck.push({text:txt, points:pts, exclusive:false});
   });
@@ -173,247 +170,79 @@ function shuffle(arr){
   return arr;
 }
 
-// ---------- State ----------
-let state = {
-  players: [], // {name, score}
-  deck: [],
-  discardPile: [],
-  hands: {}, // playerIndex -> array of cards
-  dealerIndex: 0,
-  turnIndex: 0, // whose headline we're building, cycles through non-dealer... actually all players build each hand
-  order: [], // player indices to take a turn this hand
-  turnPointer: 0,
-  selectedDiscard: [],
-  selectedHeadlineCards: [],
-  currentHeadlineText: [],
-  roundNum: 1
-};
+let deck = [];
+let hand = [];
+let selected = []; // ordered indices, max 3
+let swapUsedThisHand = false;
 
-// ---------- Setup screen ----------
-function addPlayer(name){
-  const list = document.getElementById('playerList');
-  const row = document.createElement('div');
-  row.className = 'player-row';
-  row.innerHTML = `<input type="text" placeholder="Player name" value="${name||''}">
-    <button class="remove" onclick="this.parentElement.remove()">✕</button>`;
-  list.appendChild(row);
-}
-addPlayer(); addPlayer(); addPlayer();
-
-function startGame(){
-  const inputs = document.querySelectorAll('#playerList input');
-  const names = Array.from(inputs).map(i=>i.value.trim()).filter(Boolean);
-  if(names.length < 2){ alert("Add at least 2 players."); return; }
-  state.players = names.map(n=>({name:n, score:0}));
-  state.deck = buildDeck();
-  state.discardPile = [];
-  state.dealerIndex = Math.floor(Math.random()*state.players.length);
-  document.getElementById('setup').classList.add('hidden');
-  document.getElementById('game').classList.remove('hidden');
-  startNextHandInternal();
+function draw(){
+  if(deck.length===0) deck = freshDeck();
+  return deck.pop();
 }
 
-// ---------- Hand flow ----------
-function startNextHandInternal(){
-  // reshuffle discard into deck if needed
-  if(state.deck.length < state.players.length*5){
-    state.deck = shuffle(state.deck.concat(state.discardPile));
-    state.discardPile = [];
-  }
-  state.hands = {};
-  state.order = state.players.map((_,i)=>i).filter(i=>i!==state.dealerIndex);
-  // dealer also plays, goes last in order per "left of dealer discards first" -> dealer's headline turn order: left of dealer first, then around, dealer last
-  let n = state.players.length;
-  let ordered = [];
-  for(let k=1;k<n;k++){ ordered.push((state.dealerIndex+k)%n); }
-  ordered.push(state.dealerIndex);
-  state.order = ordered;
-  state.turnPointer = 0;
-  state.roundNum = (state.roundNum||1);
-  renderScoreboard();
-  document.getElementById('roundPill').textContent = `Hand — Dealer: ${state.players[state.dealerIndex].name}`;
-  showPanel('dealerPanel');
-  document.getElementById('dealerName').textContent = state.players[state.dealerIndex].name;
-  document.getElementById('dealerName2').textContent = state.players[state.dealerIndex].name;
+function init(){
+  deck = freshDeck();
+  hand = [];
+  for(let i=0;i<5;i++) hand.push(draw());
+  selected = [];
+  swapUsedThisHand = false;
+  renderHand();
 }
 
-function drawCard(){
-  if(state.deck.length===0){
-    state.deck = shuffle(state.discardPile);
-    state.discardPile = [];
-  }
-  return state.deck.pop();
-}
-
-function dealHand(){
-  state.players.forEach((p,i)=>{
-    state.hands[i] = [];
-    for(let c=0;c<5;c++) state.hands[i].push(drawCard());
-  });
-  showPanel(null);
-  startPlayerTurn();
-}
-
-function startPlayerTurn(){
-  if(state.turnPointer >= state.order.length){
-    // hand done
-    showHandSummary();
-    return;
-  }
-  const pIndex = state.order[state.turnPointer];
-  state.currentPlayer = pIndex;
-  state.selectedDiscard = [];
-  renderDiscardHand();
-  document.getElementById('turnPlayerLabel').textContent = `${state.players[pIndex].name}'s turn — pass the device`;
-  showPanel('handPanel');
-}
-
-function renderDiscardHand(){
+function renderHand(){
   const div = document.getElementById('handDiv');
   div.innerHTML = '';
-  const hand = state.hands[state.currentPlayer];
   hand.forEach((card, idx)=>{
-    const el = document.createElement('div');
-    el.className = 'hcard' + (card.exclusive?' exclusive':'') + (state.selectedDiscard.includes(idx)?' selected':'');
-    el.innerHTML = `<span class="txt">${card.text}</span><span class="pts">${card.exclusive? '★' : card.points+' pts'}</span>`;
-    el.onclick = ()=>{
-      const pos = state.selectedDiscard.indexOf(idx);
-      if(pos>-1){ state.selectedDiscard.splice(pos,1); }
-      else if(state.selectedDiscard.length<3){ state.selectedDiscard.push(idx); }
-      renderDiscardHand();
-    };
-    div.appendChild(el);
-  });
-}
-
-function confirmDiscard(){
-  const hand = state.hands[state.currentPlayer];
-  const toDiscard = state.selectedDiscard.slice().sort((a,b)=>b-a);
-  toDiscard.forEach(idx=>{
-    state.discardPile.push(hand[idx]);
-    hand.splice(idx,1);
-  });
-  const need = 5-hand.length;
-  for(let i=0;i<need;i++) hand.push(drawCard());
-  state.selectedDiscard = [];
-  goToHeadline();
-}
-
-function goToHeadline(){
-  state.selectedHeadlineCards = [];
-  renderHeadlineHand();
-  document.getElementById('headlineTurnLabel').textContent = `${state.players[state.currentPlayer].name}: build your headline`;
-  document.getElementById('exclusiveToggle').checked = false;
-  showPanel('headlinePanel');
-}
-
-function renderHeadlineHand(){
-  const div = document.getElementById('headlineHandDiv');
-  div.innerHTML = '';
-  const hand = state.hands[state.currentPlayer];
-  hand.forEach((card, idx)=>{
-    const selPos = state.selectedHeadlineCards.indexOf(idx);
+    const selPos = selected.indexOf(idx);
     const el = document.createElement('div');
     el.className = 'hcard' + (card.exclusive?' exclusive':'') + (selPos>-1?' selected':'');
-    el.innerHTML = `<span class="txt">${card.text}${selPos>-1?' <b>#'+(selPos+1)+'</b>':''}</span><span class="pts">${card.exclusive? '★' : card.points+' pts'}</span>`;
+    el.innerHTML = `<span class="txt">${card.text}${selPos>-1?' <b>#'+(selPos+1)+'</b>':''}</span><span class="pts">${card.exclusive?'★':card.points+' pts'}</span>`;
     el.onclick = ()=>{
-      if(card.exclusive){ document.getElementById('exclusiveToggle').checked = true; return; }
-      const pos = state.selectedHeadlineCards.indexOf(idx);
-      if(pos>-1){ state.selectedHeadlineCards.splice(pos,1); }
-      else{ state.selectedHeadlineCards.push(idx); }
-      renderHeadlineHand();
-      updateHeadlinePreview();
+      const pos = selected.indexOf(idx);
+      if(pos>-1){ selected.splice(pos,1); }
+      else if(selected.length<3){ selected.push(idx); }
+      renderHand();
     };
     div.appendChild(el);
   });
-  updateHeadlinePreview();
+  document.getElementById('selCounter').textContent = `${selected.length}/3 selected`;
+  document.getElementById('showBtn').disabled = selected.length!==3;
+  document.getElementById('swapBtn').disabled = selected.length===0 || swapUsedThisHand;
+  document.getElementById('swapNote').textContent = swapUsedThisHand
+    ? "Swap already used this hand. Draw a new hand to swap again."
+    : "You can swap up to 3 cards once per hand. Select the cards to replace, then tap Swap.";
 }
 
-function updateHeadlinePreview(){
-  const hand = state.hands[state.currentPlayer];
-  const words = state.selectedHeadlineCards.map(idx=>hand[idx].text);
-  document.getElementById('headlinePreview').textContent = words.length? words.join(' ') : "Your headline will appear here...";
-  let pts = state.selectedHeadlineCards.reduce((sum,idx)=>sum+hand[idx].points,0);
-  if(document.getElementById('exclusiveToggle').checked) pts *= 2;
-  document.getElementById('pointsPreview').textContent = pts;
-}
-document.addEventListener('change', (e)=>{
-  if(e.target && e.target.id==='exclusiveToggle') updateHeadlinePreview();
-});
-
-function submitHeadline(){
-  const hand = state.hands[state.currentPlayer];
-  if(state.selectedHeadlineCards.length===0){
-    // can't make a headline
-    state.pendingZero = true;
-    showPanel('zeroPanel');
-    return;
-  }
-  const words = state.selectedHeadlineCards.map(idx=>hand[idx].text);
-  let pts = state.selectedHeadlineCards.reduce((sum,idx)=>sum+hand[idx].points,0);
-  const exclusive = document.getElementById('exclusiveToggle').checked;
-  if(exclusive) pts *= 2;
-  state.pendingHeadline = words.join(' ');
-  state.pendingPoints = pts;
-  document.getElementById('voteHeadlineText').textContent = state.pendingHeadline;
-  showPanel('votePanel');
+function swapSelected(){
+  if(swapUsedThisHand || selected.length===0) return;
+  const toSwap = selected.slice().sort((a,b)=>b-a);
+  toSwap.forEach(idx=>{ hand.splice(idx,1); });
+  const need = 5-hand.length;
+  for(let i=0;i<need;i++) hand.push(draw());
+  selected = [];
+  swapUsedThisHand = true;
+  renderHand();
 }
 
-function resolveVote(makesSense){
-  if(makesSense){
-    state.players[state.currentPlayer].score += state.pendingPoints;
-    finishTurnAdvance();
-  } else {
-    showPanel('zeroPanel');
-  }
+function newHand(){
+  hand = [];
+  for(let i=0;i<5;i++) hand.push(draw());
+  selected = [];
+  swapUsedThisHand = false;
+  renderHand();
 }
 
-function finishTurnZero(){
-  state.players[state.currentPlayer].score += 0;
-  finishTurnAdvance();
+function showFullscreen(){
+  if(selected.length!==3) return;
+  const text = selected.map(idx=>hand[idx].text).join(' ');
+  document.getElementById('fullscreenText').innerHTML = `<div class="word">${text}</div>`;
+  document.getElementById('fullscreen').classList.remove('hidden');
+}
+function closeFullscreen(){
+  document.getElementById('fullscreen').classList.add('hidden');
 }
 
-function finishTurnAdvance(){
-  renderScoreboard();
-  state.turnPointer++;
-  startPlayerTurn();
-}
-
-function showHandSummary(){
-  const div = document.getElementById('handSummary');
-  div.innerHTML = state.players.map(p=>`<div class="srow"><span>${p.name}</span><span>${p.score} pts</span></div>`).join('');
-  showPanel('nextHandPanel');
-  // check winner
-  const maxScore = Math.max(...state.players.map(p=>p.score));
-  if(maxScore >= 500){
-    const winners = state.players.filter(p=>p.score===maxScore);
-    document.getElementById('winnerText').textContent = winners.length>1
-      ? `Tie! Highest score wins: ${winners.map(w=>w.name).join(' & ')} with ${maxScore} pts!`
-      : `🏆 ${winners[0].name} wins with ${maxScore} points!`;
-    document.getElementById('winnerPanel').classList.remove('hidden');
-    document.getElementById('nextHandPanel').classList.add('hidden');
-  }
-}
-
-function startNextHand(){
-  state.dealerIndex = (state.dealerIndex+1) % state.players.length;
-  startNextHandInternal();
-}
-
-// ---------- helpers ----------
-function showPanel(id){
-  ['dealerPanel','handPanel','headlinePanel','votePanel','zeroPanel','nextHandPanel'].forEach(pid=>{
-    document.getElementById(pid).classList.toggle('hidden', pid!==id);
-  });
-}
-
-function renderScoreboard(){
-  const div = document.getElementById('scoreboard');
-  const maxScore = Math.max(...state.players.map(p=>p.score),0);
-  div.innerHTML = state.players.map(p=>
-    `<div class="srow ${p.score===maxScore && maxScore>0 ? 'leader':''}"><span>${p.name}</span><span>${p.score} pts</span></div>`
-  ).join('');
-}
+init();
 </script>
 </body>
 </html>
